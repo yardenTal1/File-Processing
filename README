@@ -1,0 +1,121 @@
+cyoavc
+yardental
+
+
+=============================
+=      File description     =
+=============================
+
+DirectoryProcessor.java - The manager class of the program, it uses the seperate classes to exsecute 
+						  the program.
+
+CommandReader.java - This is the class that takes care of reading the command file and creating the 
+					 sections with the appropriate filters an orders, and also reads the source directory.
+
+Printer.java - This is the class that is in charge of printing the output.
+
+Section.java - Each section object has it's own filter and order. And it saves it's warnings and output
+			   files. The directory processor uses each section in turn to filter and order the files as
+			   requested.
+
+SectionFactory.java - This class creates the sections according to input from the CommandReader.
+
+Order.java - An abstract class describing an order object used by this program.
+
+OrderFactory.java - This class creates the order according to input from the CommandReader.
+
+AbsOrder.java - Order type that orders the files according to absolute path from a to z.
+
+SizeOrder.java - Order type that orders the files according to size in ascending order.
+
+TypeOrder.java - Order type that orders the files according to file type.
+
+FilterInterface.java - an interface describing the methods a filter object must implement.
+
+FilterFactory.java - This class creates the filter object according to input from the CommandReader.
+
+AllFilter.java - This filter does not filter any files.
+
+NameFilter.java - This filter class is used to filter according to files names.
+
+PermissionsFilter.java - filter according to specified permission (writable, etc.).
+
+SizeFilter.java - filter according to specified size (greater then, etc.).
+
+ErrorException.Java - This class is used when an unchecked exception occurs.
+
+WarningException.java - This class is used when an checked exception occurs.
+
+=============================
+=          Design           =
+=============================
+
+In our design we put great emphasis on the modularity of the program, we broke down the process to small
+problems that needs be taken care of in order to accomplish the task at hand. So we wanted to have a manager
+class that will work with the other classes that each of them takes care of only a small part of the problem.
+
+This is a brief explanation of our program:
+	- The main class DirectoryProcessor recieves the input from the user, and passes it on to the 
+	CommandReader.
+	- The CommandReader reads the command file and creates section objects using the SectionFactory.
+	- The SectionFactory uses both the FilterFactory and the OrderFactory to create the sections and returns 
+	them to the CommandReader who in turn returns a list of all sections to  the DirectoryProcessor.
+	- The CommandReader also reads the source directory nad creates a list of files, and returns the to the
+	DirectoryProcessor.
+	- Next, the DirectoryProcessor uses the sections to filter order the files, each section saves it's own
+	output.
+	- Lastly, the DirectoryProcessor calls the Printer who prints out the output using the sections from the 
+	DirectoryProcessor.
+	
+We used the factory design pattern in three places where we felt that creating a new object is not simple.
+Which is in order, filter, and section. Because we needed take into account many details and generate 
+exceptions which are unique to our program. We use our factories to create a single object each time and not
+all of them at once.
+
+Note that each and every class that uses another class, does not use it internal feilds, but it's API.
+
+We separated the Exceptions to type 1 (WarningException) and type 2 (ErrorException), and  figured out when 
+and where each exception could be generated.
+
+ErrorException - will be generated only in the CommandReader class, while reading the command file and the 
+				 source directory and attempting to create the sections since only in these parts we use the
+				 user input.
+				 And are caught in the DirectoryProcessor which generates a message to the user.
+				 
+WarningException - will be generated only in FilterFactory, PermissionsFilter and the OrderFactory. Since 
+				   warnings are issued only when reading the command file, and creating the order and filter.
+				   Are caught in the SectionFactory. And are saved as a internal feild in the section, to be
+				   printed before files.
+				   
+Note that before attempting to run program, the main method in DirectoryProcessor makes sure the the input is
+in the apropriate length.
+	
+=============================
+=      Implementation       =
+=============================
+
+Singleton method - when planning our program we've noticed that there are some classes that we do not need
+				   more than one instance of. Further more, we wanted to make sure that it will not possible
+				   to create more than one instance of them.
+				   These classes are the SectionFactory, FilterFactory, OrderFactory and every type of Order
+				   class.
+				   This method is used to prevent excess memory usage while running the program.
+
+Order - at first we planned to have the order as an inteface, and use it to specify a method of ordering 
+		files. But when got to implement the inteface we found that we can create our own Comperator object,
+		and use java's sort with it to sort the files. So we changed the Order to abstract class that 
+		implements the Comperator interface. And every section has an internal field where it remembers 
+		whether it should use regular or reverse order.
+		
+Linked List - At first we palnned using an array to hold the files, but when we found out that we can use
+			  java's sort as described, we changed it to Linked List.
+
+			  
+Another change - at first we thought that the section will use the FilterFactory nad OrderFactory, but 
+				 realized while writing that it is better that the SectionFactory will use them, and this
+				 way all of the creation that takes place in the program happens under the factory classes.
+			  
+=============================
+=          Questions        =
+=============================
+
